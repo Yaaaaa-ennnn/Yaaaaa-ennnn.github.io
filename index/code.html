@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人简历 · JS优化版</title>
+    <style>
+        /* ============================================================
+       ⭐ JS优化①：把颜色抽取为 CSS 变量，方便主题切换
+       ============================================================ */
+        :root {
+            --bg-body: #f5f7fb;
+            --bg-card: #ffffff;
+            --bg-sidebar: #1e293b;
+            --bg-basic-info: #f8fafc;
+            --bg-exp-card: #ffffff;
+            --bg-tagline: #f1f5f9;
+            --bg-skill-tag: #334155;
+
+            --text-main: #1e293b;
+            --text-heading: #0f172a;
+            --text-muted: #64748b;
+            --text-sidebar: #e2e8f0;
+            --text-sidebar-muted: #94a3b8;
+
+            --border-color: #e9eef3;
+            --accent: #3b82f6;
+            --shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.1), 0 8px 16px -6px rgba(0, 0, 0, 0.02);
+        }
+
+        /* ⭐ JS优化①：深色主题变量（body 加上 .dark 类时生效） */
+        body.dark {
+            --bg-body: #0b1120;
+            --bg-card: #1e293b;
+            --bg-sidebar: #0f172a;
+            --bg-basic-info: #1a2536;
+            --bg-exp-card: #263449;
+            --bg-tagline: #334155;
+            --bg-skill-tag: #475569;
+
+            --text-main: #e2e8f0;
+            --text-heading: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-sidebar: #e2e8f0;
+            --text-sidebar-muted: #94a3b8;
+
+            --border-color: #334155;
+            --accent: #60a5fa;
+            --shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5), 0 8px 16px -6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+            /* ⭐ JS优化①：让主题切换有过渡动画 */
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        .resume {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            align-items: stretch;
+            transition: background 0.4s ease;
+        }
+
+        /* ========= 侧边区 ========= */
+        .sidebar {
+            flex: 1 1 280px;
+            background: var(--bg-sidebar);
+            color: var(--text-sidebar);
+            padding: 2rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            transition: background 0.4s ease;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-sidebar-muted);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            padding: 0.25rem 0;
+        }
+
+        .contact-icon {
+            width: 1.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background: var(--bg-skill-tag);
+            color: #e2e8f0;
+            padding: 0.3rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .skill-tag:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .lang-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            padding: 0.2rem 0;
+        }
+
+        /* ========= 主区 ========= */
+        .main {
+            flex: 2 1 600px;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            transition: background 0.4s ease;
+        }
+
+        .header {
+            padding: 2rem 2rem 1.5rem 2rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .name-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-heading);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            transition: color 0.4s ease;
+        }
+
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .name-title .title {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+            min-height: 1.8rem;
+            transition: color 0.4s ease;
+        }
+
+        /* ⭐ JS优化②：打字机光标 */
+        .title .cursor {
+            display: inline-block;
+            width: 2px;
+            background: var(--accent);
+            margin-left: 2px;
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .header-tagline {
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-tagline span {
+            background: var(--bg-tagline);
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            transition: background 0.4s ease;
+        }
+
+        /* ⭐ JS优化①：主题切换按钮样式 */
+        .theme-toggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.6rem;
+            height: 2.6rem;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.25s, background 0.4s, border-color 0.4s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg) scale(1.08);
+        }
+
+        .content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.2rem;
+            flex: 1;
+        }
+
+        .basic-info {
+            background: var(--bg-basic-info);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+            transition: color 0.4s ease;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1.2rem;
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 2rem;
+        }
+
+        .info-item {
+            flex: 1 1 200px;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            font-size: 0.98rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-main);
+            min-width: 4.5rem;
+        }
+
+        .info-value {
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .experience-placeholder {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .exp-card {
+            background: var(--bg-exp-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.25rem 1.5rem;
+            transition: box-shadow 0.15s, background 0.4s, border-color 0.4s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .exp-card:hover {
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
+            border-color: #d0dae8;
+        }
+
+        .exp-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .exp-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-heading);
+        }
+
+        .exp-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--bg-tagline);
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+        }
+
+        .exp-sub {
+            font-size: 0.95rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .exp-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        /* ⭐ JS优化③：滚动渐入动画的初始状态 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ⭐ JS优化④：返回顶部按钮 */
+        #backToTop {
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s, background 0.4s;
+            z-index: 100;
+        }
+
+        #backToTop.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        #backToTop:hover {
+            transform: translateY(-4px) scale(1.05);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .sidebar {
+                padding: 1.5rem;
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .name-title h1 {
+                font-size: 2rem;
+            }
+
+            .info-item {
+                flex: 1 1 100%;
+            }
+
+            #backToTop {
+                right: 1rem;
+                bottom: 1rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="resume">
+        <!-- ================= 侧边区 ================= -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>联系方式</h3>
+                <div class="contact-item"><span class="contact-icon">📧</span><span>wang.work@email.com</span></div>
+                <div class="contact-item"><span class="contact-icon">📱</span><span>(+86) 19213826296</span></div>
+                <div class="contact-item"><span class="contact-icon">📍</span><span>中国 · 河南</span></div>
+                <div class="contact-item"><span class="contact-icon">🔗</span><span>github.com/wangdev</span></div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>技术栈</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">HTML5</span>
+                    <span class="skill-tag">CSS3</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Vue</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">Flexbox</span>
+                    <span class="skill-tag">Git</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>语言水平</h3>
+                <div class="lang-item"><span>中文</span><span>母语</span></div>
+                <div class="lang-item"><span>英语</span><span> 流利读写</span></div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>能力</h3>
+                <div class="lang-item"><span>AI·编程者</span><span>2026下半年</span></div>
+                <div class="lang-item"><span>全栈研究</span><span>2026下半年</span></div>
+            </div>
+        </aside>
+
+        <!-- ================= 主区 ================= -->
+        <main class="main">
+            <header class="header">
+                <!-- ⭐ JS优化①：主题切换按钮 -->
+                <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+
+                <div class="name-title">
+                    <!-- ⭐ 新增：头像 -->
+                    <img class="avatar" src="avatar.jpg" alt="头像">
+                    <div class="name-text">
+                        <h1>梁志恩</h1>
+                        <div class="title" id="typewriter" data-text="全栈AI化研究"></div>
+                    </div>
+                </div>
+
+
+                <div class="header-tagline">
+                    <span>✨ 技术打磨</span>
+                    <span>⚡ 注重细节</span>
+                    <span>🚀 持续学习者</span>
+                </div>
+            </header>
+
+            <div class="content">
+                <section class="basic-info">
+                    <div class="section-title">基本信息</div>
+                    <div class="info-grid">
+                        <div class="info-item"><span class="info-label">姓名</span><span class="info-value">梁志恩</span>
+                        </div>
+                        <div class="info-item"><span class="info-label">出生日期</span><span
+                                class="info-value">2007.06.01</span></div>
+                        <div class="info-item"><span class="info-label">学历</span><span class="info-value">本科 ·
+                                智慧林业·</span></div>
+                        <div class="info-item"><span class="info-label">毕业院校</span><span
+                                class="info-value">河南农业大学</span></div>
+                        <div class="info-item"><span class="info-label">求职意向</span><span class="info-value">AI·式前后端开发 /
+                                全栈方向</span></div>
+                        <div class="info-item"><span class="info-label">工作经验</span><span class="info-value">暂无</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-title">个人兴趣爱好</div>
+                    <div class="experience-placeholder">
+                        <div class="exp-card">
+                            <div class="exp-header">
+                                <span class="exp-title"></span>
+                                <span class="exp-date">2007.0601 — 至今</span>
+                            </div>
+                            <div class="exp-sub">运动</div>
+                            <div class="exp-desc">
+                                喜欢篮球、始终保持篮球训练，日常加强肌肉锻炼，使身体获得更好的机能。
+                            </div>
+                            <div class="exp-sub">健康</div>
+                            <div class="exp-desc">
+                                保持良好的生活习惯，严格注重饮食作息，及时补充身体所需营养。
+                            </div>
+                        </div>
+                </section>
+
+
+                <section>
+                    <div class="section-title">开发学习经历</div>
+                    <div class="experience-placeholder">
+                        <div class="exp-card">
+                            <div class="exp-header">
+                                <span class="exp-title">个人简历网站搭建与优化</span>
+                                <span class="exp-date">2026.09 — 至今</span>
+                            </div>
+                            <div class="exp-sub">首个网页</div>
+                            <div class="exp-desc">
+                                个人网页的不断迭代与优化，不断学习与进步。
+                            </div>
+                        </div>
+
+                        <div class="exp-card">
+                            <div class="exp-header">
+                                <span class="exp-title">前端开发工程师</span>
+                                <span class="exp-date">2020.06 — 2022.08</span>
+                            </div>
+                            <div class="exp-sub">美团 · 北京</div>
+                            <div class="exp-desc">
+                                参与美团外卖商家端核心功能开发，基于 Vue3 + Pinia + Vite 重构订单管理模块。与设计团队协作建立组件规范，开发效率提升约 25%。
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-title">教育经历</div>
+                    <div class="experience-placeholder">
+                        <div class="exp-card">
+                            <div class="exp-header">
+                                <span class="exp-title">智慧林业 · 本科</span>
+                                <span class="exp-date">2025.09 —— 2029.06</span>
+                            </div>
+                            <div class="exp-sub">河南农业大学</div>
+                            <div class="exp-desc">
+                                主修课程：植物学、树木学、森林经理学、测绘学、遥感技术、Python与c++和机器学习。GPA 3.8/5.0，校级优秀毕业生。
+                                自学前后端开发，自己熟练用AI搭建个人项目
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- ⭐ JS优化④：返回顶部按钮 -->
+    <button id="backToTop" title="返回顶部">↑</button>
+
+    <!-- ============================================================
+       ⭐⭐⭐ 所有 JavaScript 优化集中在这里 ⭐⭐⭐
+       ============================================================ -->
+    <script>
+        /* ⭐ JS优化①：深浅色主题切换（记住用户的选择） */
+        (function themeToggle() {
+            const btn = document.getElementById('themeToggle');
+            const body = document.body;
+
+            // 读取上次保存的主题
+            const saved = localStorage.getItem('resume-theme');
+            if (saved === 'dark') {
+                body.classList.add('dark');
+                btn.textContent = '☀️';
+            }
+
+            btn.addEventListener('click', () => {
+                body.classList.toggle('dark');
+                const isDark = body.classList.contains('dark');
+                btn.textContent = isDark ? '☀️' : '🌙';
+                localStorage.setItem('resume-theme', isDark ? 'dark' : 'light');
+            });
+        })();
+
+        /* ⭐ JS优化②：职位打字机效果 */
+        (function typewriter() {
+            const el = document.getElementById('typewriter');
+            if (!el) return;
+            const text = el.dataset.text || el.textContent.trim();
+            el.textContent = '';   // 清空，准备逐字显示
+
+            let i = 0;
+            const speed = 110;     // 每个字的间隔（毫秒）
+
+            function type() {
+                if (i < text.length) {
+                    el.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    // 打完后闪烁光标
+                    const cursor = document.createElement('span');
+                    cursor.className = 'cursor';
+                    el.appendChild(cursor);
+                }
+            }
+            // 稍微延迟一点再开始，页面更自然
+            setTimeout(type, 400);
+        })();
+
+        /* ⭐ JS优化③：滚动渐入动画（用 IntersectionObserver 监听） */
+        (function scrollReveal() {
+            // 选中要动画的元素
+            const targets = document.querySelectorAll(
+                '.sidebar-section, .header, .content > section, .exp-card'
+            );
+
+            // 给它们加上初始类
+            targets.forEach(el => el.classList.add('reveal'));
+
+            // 观察器：进入视口就加 .visible
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);   // 出现一次即可
+                    }
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            targets.forEach(el => observer.observe(el));
+        })();
+
+        /* ⭐ JS优化④：返回顶部按钮（滚动超过 300px 才显示） */
+        (function backToTop() {
+            const btn = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    btn.classList.add('show');
+                } else {
+                    btn.classList.remove('show');
+                }
+            });
+
+            btn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
+    </script>
+</body>
+
+</html>
